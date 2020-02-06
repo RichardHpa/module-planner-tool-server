@@ -1,0 +1,41 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+
+const User = require('../models/Users');
+
+router.post('/register', function(req, res){
+    User.findOne({ username: req.body.username }, function (err, checkUser) {
+        if(checkUser){
+            res.send('user already exists');
+        } else {
+            const hash = bcrypt.hashSync(req.body.password);
+            const user = new User({
+                _id: new mongoose.Types.ObjectId(),
+                username: req.body.username,
+                email: req.body.email,
+                password: hash
+            });
+            user.save().then(result => {
+                res.send(result);
+            }).catch(err => res.send(err));
+        }
+    });
+});
+
+router.post('/login', function(req, res){
+    User.findOne({ username: req.body.username }, function (err, checkUser) {;
+        if(checkUser){
+            if(bcrypt.compareSync(req.body.password, checkUser.password)){
+                res.send(checkUser);
+            } else {
+                res.send('invalid password');
+            }
+        } else {
+            res.send('invalid user');
+        }
+    });
+});
+
+module.exports = router;
