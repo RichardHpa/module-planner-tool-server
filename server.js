@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+// const port = 3000;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config()
@@ -11,6 +11,7 @@ const plans = require('./routes/planner');
 const users = require('./routes/users');
 
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER_NAME}.mongodb.net/${process.env.MONGO_TABLE_NAME}?retryWrites=true&w=majority`, {useUnifiedTopology: true});
+mongoose.set('useCreateIndex', true);
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -35,7 +36,9 @@ app.get('/', function(req, res){
 app.use('/plans', plans);
 app.use('/users', users);
 
-app.listen(port, () => {
+
+app.set('port', process.env.PORT || 8000);
+app.listen(app.get('port'), () => {
     console.clear();
-    console.log(`application is running on port ${port}`)
+    console.log(`application is running on port ${app.get('port')}`);
 });
